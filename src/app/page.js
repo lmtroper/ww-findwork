@@ -57,7 +57,7 @@ export default function Home() {
       <input 
         id="resume-upload" 
         type="file" 
-        accept=".pdf,.doc,.docx" 
+        accept=".pdf" 
         style={{ display: 'none' }} 
         onChange={handleResumeUpload} 
       />
