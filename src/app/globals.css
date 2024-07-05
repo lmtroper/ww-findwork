@@ -20,7 +20,6 @@ body {
 
 .active-tab {
   background-color: rgba(94, 184, 246, 0.3);
-  padding: 10px;
   border-radius: 10px;
 }
 
@@ -39,7 +38,7 @@ body {
   color: #ffffff;
   font-weight: 500;
   padding: 15px 20px;
-  border-radius: 14px;
+  border-radius: 8px;
   height: 55px;
 }
 
@@ -64,12 +63,14 @@ body {
 .resume-upload-btn {
   height: 55px;
   color: #063C5C;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 1px solid #063C5C;
+  cursor: pointer;
 }
 
 .resume-upload-btn:hover {
   background-color: #e4e4e4;
+  cursor: pointer;
 }
 
 .circle {
@@ -102,3 +103,4 @@ body {
   border-radius: 14px;
   margin: 5px;
 }
+

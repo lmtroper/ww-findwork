@@ -9,10 +9,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <div className="flex">
+      <body className="w-screen h-screen">
+        <div className="h-full w-full flex">
+          <div className="h-full w-fit">
             <Navbar />
+          </div>
+          <div className="h-full w-full flex items-center justify-center">
             {children}
+          </div>
         </div>
       </body>
     </html>

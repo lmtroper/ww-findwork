@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import Circle from '@/app/components/Circle'
 import { Bakbak_One } from "next/font/google";
+import Image from 'next/image';
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const resumeSkills = ["Product", "Python", "Agile", "Java", "Project Management", "React", "Development"]
@@ -21,8 +22,8 @@ const page = () => {
   };
 
   return (
-    <div className='w-full absolute top-[200px] flex flex-col items-center justify-center px-10'>
-    <div className='max-w-[800px]'>
+    <div className='max-w-[800px] absolute top-[200px] flex flex-col items-center justify-center pr-20'>
+    <div className='w-[800px]'>
         <div className='flex justify-between items-center mb-16'>
             <div className='text-[#063C5C] font-medium'>
                 <Link href="/questionnaire1" className='flex underline cursor-pointer'>Upload a different resume</Link>
@@ -50,6 +51,14 @@ const page = () => {
             ))}
         </div>
     </div>
+    <label htmlFor="add-skills" className='mb-5 resume-upload-btn w-[640px] flex justify-center items-center'>
+        <Image src="/add.png" alt="upload" width={25} height={25} />
+        <div className='ml-2'>Add additional skills</div>
+      </label>
+      <button 
+        id="resume-upload" 
+        style={{ display: 'none' }} 
+      />
     <Link href="questionnaire3">
         <button className='signin-button w-[640px]'>Next</button>
     </Link>
