@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ClipLoader } from 'react-spinners';
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
 import { retrieveUserPreferences, retrieveUserResume } from "../helpers/retrieve_data"
@@ -62,7 +63,7 @@ const Page = () => {
   const [jobData, setJobData] = useState(null);
   const [preferences, setPreferences] = useState(null);
   const [resume, setResume] = useState("python, javascript, react, financial")
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getCachedData("ijmmbpioejdfnlbghgeonddkajmjccpm")
@@ -102,12 +103,20 @@ const Page = () => {
   useEffect(() => {
     // Check if all data is loaded
     if (jobData !== null && preferences !== null && resume !== "") {
-      setDataLoaded(true);
+      setLoading(false)
       var jobDataUtility = assignUtility(jobData, preferences, resume)
       setJobs(jobDataUtility)
 
     }
   }, [jobData, preferences, resume]);
+
+  if (loading) {
+    return (
+      <div className="spinner-container">
+        <ClipLoader size={50} color={"#123abc"} loading={loading} />
+      </div>
+    );
+  }
 
   return (
     <ProtectedRoute>
