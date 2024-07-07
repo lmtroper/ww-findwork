@@ -3,11 +3,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Circle from "@/app/components/Circle";
+import ScrapeButton from "@/app/components/ScrapeButton";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
-const page = () => {
+const Page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [resume, setResume] = useState(null);
   const [resumeURL, setResumeURL] = useState(null);
@@ -73,6 +74,7 @@ const page = () => {
           style={{ display: "none" }}
           onChange={handleResumeUpload}
         />
+        <ScrapeButton/>
         <Link href="questionnaire2">
           <button className="signin-button w-[640px]">
             Start questionnaire
@@ -83,4 +85,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

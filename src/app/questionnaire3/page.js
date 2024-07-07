@@ -11,7 +11,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
-const page = () => {
+const Page = () => {
   const [salary, setSalary] = useState();
   const [salaryImportance, setSalaryImportance] = useState(5);
   const [program, setProgram] = useState("");
@@ -181,7 +181,7 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
 
 const ImportanceScale = ({ importance, setImportance }) => {
   const marks = {
