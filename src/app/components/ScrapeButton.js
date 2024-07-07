@@ -1,29 +1,6 @@
 import { useState } from 'react';
 import { parsePostings } from "../helpers/parse_data"
 
-const extensionId = "ijmmbpioejdfnlbghgeonddkajmjccpm";
-
-function getCachedData() {
-  return new Promise((resolve, reject) => {
-    if (!chrome.runtime) {
-      reject("chrome.runtime is not available");
-      return;
-    }
-
-    chrome.runtime.sendMessage(
-      extensionId,
-      { action: "getCachedData" },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          resolve(response);
-        }
-      }
-    );
-  });
-}
-
 const ScrapeButton = () => {
   const [data, setData] = useState(null);
 

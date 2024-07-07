@@ -72,7 +72,6 @@ const Page = () => {
         });
       }
     };
-
     updateUserQuestainnare();
   };
 

@@ -1,9 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
+import { retrieveUserPreferences, retrieveUserResume } from "../helpers/retrieve_data"
+import { getCachedData, parsePostings } from "../helpers/parse_data";
+import { assignUtility } from "../helpers/utility_score";
+import { auth, db } from '../../../firebase';
+import { onAuthStateChanged } from "firebase/auth";
+
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const sampleJobs = [
@@ -52,7 +58,56 @@ const sampleJobs = [
 ];
 
 const Page = () => {
-  const [jobs, setJobs] = useState(sampleJobs);
+  const [jobs, setJobs] = useState([]);
+  const [jobData, setJobData] = useState(null);
+  const [preferences, setPreferences] = useState(null);
+  const [resume, setResume] = useState("python, javascript, react, financial")
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    getCachedData("ijmmbpioejdfnlbghgeonddkajmjccpm")
+    .then((data) => {
+      const jobResults = parsePostings(data)
+      setJobData(jobResults);
+      console.log(jobResults)
+    })
+    .catch((error) => {
+      console.error("Failed to get cached data:", error);
+    });
+  }, [])
+
+  useEffect(() => {
+    
+    const fetchPreferences = async () => {
+      const user = auth.currentUser;
+      console.log(`user: ${user}`)
+      const userPreferences = await retrieveUserPreferences(user.uid);
+      setPreferences(userPreferences);
+      console.log(userPreferences)
+    };
+
+    const getPreferences = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User authenticated:", user);
+        fetchPreferences(user);
+      } else {
+        console.log("No authenticated user found.");
+      }
+    });
+
+    return () => getPreferences();
+    
+  }, []);
+
+  useEffect(() => {
+    // Check if all data is loaded
+    if (jobData !== null && preferences !== null && resume !== "") {
+      setDataLoaded(true);
+      var jobDataUtility = assignUtility(jobData, preferences, resume)
+      setJobs(jobDataUtility)
+
+    }
+  }, [jobData, preferences, resume]);
 
   return (
     <ProtectedRoute>
@@ -95,13 +150,14 @@ const Job = ({ job }) => {
         <div>
           <Link href={job.url} target="_blank" className="cursor-pointer">
             <div className="text-[16px] text-black font-semibold underline mb-2">
-              {job.title}
+              {job.jobTitle}
             </div>
           </Link>
         </div>
         <div className="flex">
-          <div className="text-[14px] text-black">{job.company} - </div>
-          <div className="text-[14px] text-black">{job.location}</div>
+        <div className="text-[14px] text-black">
+          {job.company + " - " + job.mappedRegion}
+        </div>
         </div>
       </div>
       <div className="flex">

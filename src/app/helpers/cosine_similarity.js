@@ -1,14 +1,11 @@
 // Reference used: https://medium.com/analytics-vidhya/building-a-text-similarity-checker-using-cosine-similarity-in-javascript-and-html-75722d485703
 
-function wordCountMap(str){
-    /**
- * [function that returns a count of each distinct word in a body of text]
- * @param  {[string]} textBody
- */
-    let words = str.split(' ');
+function wordCountMap(text){
+
+    let words = text.split(' ');
     let wordCountMap = {};
     words.forEach((w)=>{
-        wordCount[w] = (wordCount[w] || 0) +1;
+        wordCountMap[w] = (wordCountMap[w] || 0) +1;
 
     });
 return wordCountMap;
@@ -49,8 +46,10 @@ function cosineSimilarity(vecA,vecB){
     return dotProduct(vecA,vecB)/ (magnitude(vecA) * magnitude(vecB));
 }
 
-function textCosineSimilarity(txtA,txtB){
+export function textCosineSimilarity(txtA,txtB){
     // Build word counts for both texts
+    console.log(`job details: ${txtA}`)
+    console.log(`resume: ${txtB}`)
     const wordCountA = wordCountMap(txtA);
     const wordCountB = wordCountMap(txtB);
     let dict = {};
