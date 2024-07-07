@@ -22,11 +22,15 @@ const Login = () => {
           await setDoc(userRef, {
             email: user.email,
             displayName: user.displayName,
-            salaryPreference: "",
+            salaryPreference: 20,
+            salaryWeight: 5,
             skills: [],
             programPreference: "",
-            jobLevel: "",
-            locationPreference: "",
+            programWeight: 5,
+            jobLevel: [],
+            jobLevelWeight: 5,
+            locationPreference: [],
+            locationWeight: 5,
           });
           router.push("/questionnaire1");
         } else {
@@ -56,10 +60,14 @@ const Login = () => {
           email: user.email,
           displayName: user.displayName,
           salaryPreference: "",
+          salaryWeight: 5,
           skills: [],
           programPreference: "",
-          jobLevel: "",
-          locationPreference: "",
+          programWeight: 5,
+          jobLevel: [],
+          jobLevelWeight: 5,
+          locationPreference: [],
+          locationWeight: 5,
         });
         router.push("/questionnaire1");
       } else {

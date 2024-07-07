@@ -1,10 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Circle from "@/app/components/Circle";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
 import Image from "next/image";
+import { auth, db } from '../../../firebase';
+import { doc, getDoc, updateDoc } from "firebase/firestore"; 
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const resumeSkills = [
@@ -21,6 +23,39 @@ const page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [skills, setSkills] = useState(resumeSkills);
   const [selectedSkills, setSelectedSkills] = useState([]);
+
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      try {
+        const user = auth.currentUser;
+
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setSelectedSkills(userData.skills);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    console.log(auth.currentUser)
+    fetchUserSkills();
+  }, []);
+
+  const postSkills = () => {
+    const updateUserSkills = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { skills: selectedSkills });
+      }
+    };
+
+    if (selectedSkills.length > 0) {
+      updateUserSkills();
+    }
+  };
 
   const toggleSkill = (skill) => {
     if (selectedSkills.includes(skill)) {
@@ -82,7 +117,7 @@ const page = () => {
         </label>
         <button id="resume-upload" style={{ display: "none" }} />
         <Link href="questionnaire3">
-          <button className="signin-button w-[640px]">Next</button>
+          <button className="signin-button w-[640px]" onClick={postSkills}>Next</button>
         </Link>
       </div>
     </ProtectedRoute>
