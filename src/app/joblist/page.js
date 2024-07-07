@@ -62,7 +62,7 @@ const Page = () => {
   const [jobs, setJobs] = useState([]);
   const [jobData, setJobData] = useState(null);
   const [preferences, setPreferences] = useState(null);
-  const [resume, setResume] = useState("python, javascript, react, financial")
+  const [resume, setResume] = useState("python, javascript, programming")
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -59,14 +59,21 @@ export function parsePostings(data) {
 
                 var company = postingListData["company"] || ""
                 var responsibilities = jobPostingInfo["Job Responsibilities"] || ""
-                var summary = jobPostingInfo["Job Summary"] || ""
                 var skills = jobPostingInfo["Required Skills"] || ""
-                var jobDescription = responsibilities + "\n" + summary + "\n" + skills
+                var summary = jobPostingInfo["Job Summary"] || ""
+                var jobDescription = responsibilities + "\n" + skills
                 jobDescription = extractText(jobDescription)
                 jobDescription = removeStopwords(jobDescription, stopwords)
 
                 var compensation = jobPostingInfo["Compensation and Benefits"] || "0";
                 var formattedCompensation = formatCompensation(compensation);
+                // Compensation may lie in job description or responsibilities
+                if (formattedCompensation === 0) {
+                    const summarySalary = formatCompensation(summary);
+                    const descriptionSalary = formatCompensation(jobDescription);
+            
+                    formattedCompensation = summarySalary !== 0 ? summarySalary : (descriptionSalary !== 0 ? descriptionSalary : 0);
+                }
                 var jobTitle = jobPostingInfo["Job Title"] || "N/A";
                 var targetedDegrees = jobPostingInfo["Targeted Degrees and Disciplines"] || "N/A";
                 var formattedTargetedDegrees = extractThemesFromPrograms(targetedDegrees); // Pass targetedDegrees
