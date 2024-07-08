@@ -5,23 +5,63 @@ import Image from "next/image";
 import Circle from "@/app/components/Circle";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth } from "firebase/auth";
+
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
-const page = () => {
+const Page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [resume, setResume] = useState(null);
   const [resumeURL, setResumeURL] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const handleResumeUpload = (event) => {
+  const handleResumeUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       setResume(file);
       const url = URL.createObjectURL(file);
       setResumeURL(url);
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result.split(',')[1];
+        
+        const functions = getFunctions();
+        const extractTextFromPDF = httpsCallable(functions, 'extractTextFromPDF');
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (user) {
+          try {
+            const result = await fetch('https://us-central1-ww-findwork.cloudfunctions.net/extractTextFromPDF', {
+              mode: 'no-cors',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.uid, // Pass the user ID in the headers
+              },
+              body: JSON.stringify({ base64: base64String }),
+            });
+            
+            if (result.ok) {
+              const data = await result.json();
+              console.log("Extracted text from PDF:", data.text);
+            } else {
+              console.error("Error extracting text from PDF:", await result.text());
+            }
+          } catch (error) {
+            console.error("Error extracting text from PDF:", error);
+          }
+        } else {
+          console.error("User not authenticated");
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handeNext = () => {
+  const handleNext = () => {
     // handle the next button click here
     // TO-DO: parse through resume, extract skills section
   };
@@ -35,9 +75,7 @@ const page = () => {
             <Circle number={2} active={false} />
             <Circle number={3} active={false} />
           </div>
-          <div
-            className={`${bakbakOne.className} font-bold text-3xl mb-8 text-center`}
-          >
+          <div className={`${bakbakOne.className} font-bold text-3xl mb-8 text-center`}>
             Welcome to FindWork on WaterlooWorks, {username}!
           </div>
           <div className="mb-16 font-light text-sm text-center">
@@ -73,6 +111,9 @@ const page = () => {
           style={{ display: "none" }}
           onChange={handleResumeUpload}
         />
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="mb-5">Uploading: {uploadProgress}%</div>
+        )}
         <Link href="questionnaire2">
           <button className="signin-button w-[640px]">
             Start questionnaire
@@ -83,4 +124,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

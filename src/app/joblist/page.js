@@ -51,7 +51,7 @@ const sampleJobs = [
   },
 ];
 
-const page = () => {
+const Page = () => {
   const [jobs, setJobs] = useState(sampleJobs);
 
   return (
@@ -86,7 +86,7 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
 
 const Job = ({ job }) => {
   return (

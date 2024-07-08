@@ -17,7 +17,7 @@ const resumeSkills = [
   "Development",
 ];
 
-const page = () => {
+const Page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [skills, setSkills] = useState(resumeSkills);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -89,4 +89,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

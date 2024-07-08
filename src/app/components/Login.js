@@ -28,9 +28,11 @@ const Login = () => {
             jobLevel: "",
             locationPreference: "",
           });
+          localStorage.setItem("userDocId", user.uid);
           router.push("/questionnaire1");
         } else {
           console.log("User already exists");
+          localStorage.setItem("userDocId", user.uid);
           router.push("/joblist");
         }
       }
@@ -61,9 +63,11 @@ const Login = () => {
           jobLevel: "",
           locationPreference: "",
         });
+        localStorage.setItem("userDocId", user.uid);
         router.push("/questionnaire1");
       } else {
         console.log("User already exists");
+        localStorage.setItem("userDocId", user.uid);
         router.push("/joblist");
       }
     } catch (error) {
