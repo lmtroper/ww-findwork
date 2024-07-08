@@ -2,89 +2,53 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ClipLoader } from 'react-spinners';
+import { ClipLoader } from "react-spinners";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
-import { retrieveUserPreferences, retrieveUserResume } from "../helpers/retrieve_data"
+import {
+  retrieveUserPreferences,
+  retrieveUserResume,
+} from "../helpers/retrieve_data";
 import { getCachedData, parsePostings } from "../helpers/parse_data";
 import { assignUtility } from "../helpers/utility_score";
-import { auth, db } from '../../../firebase';
+import { auth, db } from "../../../firebase";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
-
-const sampleJobs = [
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-  {
-    title: "Software Engineer",
-    company: "Google",
-    location: "Waterloo, ON",
-    url: "https://www.google.com",
-  },
-];
 
 const Page = () => {
   const [jobs, setJobs] = useState([]);
   const [jobData, setJobData] = useState(null);
   const [preferences, setPreferences] = useState(null);
-  const [resume, setResume] = useState("python, javascript, programming")
+  const [resume, setResume] = useState("python, javascript, programming");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCachedData("ijmmbpioejdfnlbghgeonddkajmjccpm")
-    .then((data) => {
-      const jobResults = parsePostings(data)
-      setJobData(jobResults);
-      console.log(jobResults)
-    })
-    .catch((error) => {
-      console.error("Failed to get cached data:", error);
-    });
-  }, [])
+    getCachedData("koblgeegnganccfocgebfddpadolchbi")
+      .then((data) => {
+        const jobResults = parsePostings(data);
+        setJobData(jobResults);
+        console.log(jobResults);
+      })
+      .catch((error) => {
+        console.error("Failed to get cached data:", error);
+      });
+  }, []);
 
   useEffect(() => {
-    
     const fetchPreferences = async () => {
       const user = auth.currentUser;
-      console.log(`user: ${user}`)
+      console.log(`user: ${user}`);
       const userPreferences = await retrieveUserPreferences(user.uid);
       setPreferences(userPreferences);
-      console.log(userPreferences)
+      console.log(userPreferences);
     };
 
     const getPreferences = onAuthStateChanged(auth, (user) => {
@@ -97,16 +61,14 @@ const Page = () => {
     });
 
     return () => getPreferences();
-    
   }, []);
 
   useEffect(() => {
     // Check if all data is loaded
     if (jobData !== null && preferences !== null && resume !== "") {
-      setLoading(false)
-      var jobDataUtility = assignUtility(jobData, preferences, resume)
-      setJobs(jobDataUtility)
-
+      setLoading(false);
+      var jobDataUtility = assignUtility(jobData, preferences, resume);
+      setJobs(jobDataUtility);
     }
   }, [jobData, preferences, resume]);
 
@@ -153,6 +115,94 @@ const Page = () => {
 export default Page;
 
 const Job = ({ job }) => {
+  const [isThumbsUpActive, setThumbsUpActive] = useState(false);
+  const [isThumbsDownActive, setThumbsDownActive] = useState(false);
+  const [isThumbsUpDisabled, setThumbsUpDisabled] = useState(false);
+  const [isThumbsDownDisabled, setThumbsDownDisabled] = useState(false);
+  const [likes, setLikes] = useState([]);
+  const [disLikes, setDisLikes] = useState([]);
+
+  useEffect(() => {
+    const fetchLikesAndDislikes = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setLikes(data.likes || []);
+          setDisLikes(data.dislikes || []);
+        }
+      }
+    };
+
+    fetchLikesAndDislikes();
+  }, []);
+
+  useEffect(() => {
+    if (likes.includes(job.jobId)) {
+      setThumbsUpActive(true);
+      setThumbsDownDisabled(true);
+    } else {
+      setThumbsUpActive(false);
+      setThumbsDownDisabled(false);
+    }
+  }, [likes, job.jobId]);
+
+  useEffect(() => {
+    if (disLikes.includes(job.jobId)) {
+      setThumbsDownActive(true);
+      setThumbsUpDisabled(true);
+    } else {
+      setThumbsDownActive(false);
+      setThumbsUpDisabled(false);
+    }
+  }, [disLikes, job.jobId]);
+
+  const handleLike = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      if (isThumbsUpActive) {
+        await updateDoc(userRef, {
+          likes: arrayRemove(job.jobId),
+        });
+        setLikes((prevLikes) => prevLikes.filter((id) => id !== job.jobId));
+        setThumbsUpActive(false);
+      } else {
+        await updateDoc(userRef, {
+          likes: arrayUnion(job.jobId),
+        });
+        setLikes((prevLikes) => [...prevLikes, job.jobId]);
+        setThumbsUpActive(true);
+        setThumbsDownDisabled(true);
+      }
+    }
+  };
+
+  const handleDisLike = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      if (isThumbsDownActive) {
+        await updateDoc(userRef, {
+          dislikes: arrayRemove(job.jobId),
+        });
+        setDisLikes((prevDisLikes) =>
+          prevDisLikes.filter((id) => id !== job.jobId)
+        );
+        setThumbsDownActive(false);
+      } else {
+        await updateDoc(userRef, {
+          dislikes: arrayUnion(job.jobId),
+        });
+        setDisLikes((prevDisLikes) => [...prevDisLikes, job.jobId]);
+        setThumbsDownActive(true);
+        setThumbsUpDisabled(true);
+      }
+    }
+  };
+
   return (
     <div className="flex w-full justify-between items-center pt-5 pb-3 border-b-[1px] border-b-black">
       <div>
@@ -164,26 +214,43 @@ const Job = ({ job }) => {
           </Link>
         </div>
         <div className="flex">
-        <div className="text-[14px] text-black">
-          {job.company + " - " + job.mappedRegion}
-        </div>
+          <div className="text-[14px] text-black">
+            {job.company + " - " + job.mappedRegion}
+          </div>
         </div>
       </div>
       <div className="flex">
-        <Image
-          src="/thumbs-up.png"
-          className="mr-3 cursor-pointer"
-          width={40}
-          height={40}
-        />
-        <Image
-          src="/thumbs-down.png"
-          className="mr-3 cursor-pointer"
-          width={40}
-          height={40}
-        />
+        <button
+          disabled={isThumbsUpDisabled}
+          onClick={handleLike}
+          className={`mr-3 cursor-pointer p-2 rounded-full border-2 border-transparent ${
+            isThumbsUpActive ? "bg-[#4CD137] border-[#4CD137]" : "bg-gray-200"
+          } hover:bg-[#b7ecaf] ${
+            isThumbsUpDisabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <img src="/thumbs-up.png" alt="thumbs up" width={24} height={24} />
+        </button>
+        <button
+          disabled={isThumbsDownDisabled}
+          onClick={handleDisLike}
+          className={`mr-3 cursor-pointer p-2 rounded-full border-2 border-transparent ${
+            isThumbsDownActive ? "bg-[#4CD137] border-[#4CD137]" : "bg-gray-200"
+          } hover:bg-[#b7ecaf] ${
+            isThumbsDownDisabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <img
+            src="/thumbs-down.png"
+            alt="thumbs down"
+            width={24}
+            height={24}
+          />
+        </button>
         <Link href={job.url} target="_blank" className="cursor-pointer">
-          <Image src="/link.png" alt="link" width={40} height={40} />
+          <button className="p-2 rounded-full bg-gray-200 hover:bg-[#b7ecaf]">
+            <img src="/link.png" alt="link" width={24} height={24} />
+          </button>
         </Link>
       </div>
     </div>

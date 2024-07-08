@@ -287,14 +287,14 @@ const LocationCheckboxes = ({ locations, setLocations }) => {
       className="w-full flex"
     >
       <div className="flex flex-col">
-        <Checkbox value="ON">Ontario</Checkbox>
-        <Checkbox value="QC">Quebec</Checkbox>
-        <Checkbox value="USA">United States of America</Checkbox>
+        <Checkbox value="Ontario">Ontario</Checkbox>
+        <Checkbox value="Quebec">Quebec</Checkbox>
+        <Checkbox value="United States of America">United States of America</Checkbox>
       </div>
       <div className="flex flex-col">
-        <Checkbox value="INT">International</Checkbox>
-        <Checkbox value="WEST">Western Canada</Checkbox>
-        <Checkbox value="GTA">Greater Toronto Area</Checkbox>
+        <Checkbox value="International">International</Checkbox>
+        <Checkbox value="Western Canada">Western Canada</Checkbox>
+        <Checkbox value="Greater Toronto Area">Greater Toronto Area</Checkbox>
       </div>
     </Checkbox.Group>
   );
