@@ -1,14 +1,85 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Circle from "@/app/components/Circle";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Bakbak_One } from "next/font/google";
 import { Slider, Checkbox, Col, Row, Select } from "antd";
+import { auth, db } from "../../../firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const page = () => {
+  const [salary, setSalary] = useState();
+  const [salaryImportance, setSalaryImportance] = useState(5);
+  const [program, setProgram] = useState("");
+  const [programImportance, setProgramImportance] = useState(5);
+  const [jobLevels, setJobLevels] = useState([]);
+  const [jobLevelImportance, setJobLevelImportance] = useState(5);
+  const [locations, setLocations] = useState([]);
+  const [locationImportance, setLocationImportance] = useState(5);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setJobLevels(data.jobLevel);
+          setJobLevelImportance(data.jobLevelWeight);
+          setLocations(data.locationPreference);
+          setLocationImportance(data.locationWeight);
+          setProgram(data.programPreference);
+          setProgramImportance(data.programWeight);
+          setSalary(100 - data.salaryPreference); // Invert the salary slider value
+          setSalaryImportance(data.salaryWeight);
+        }
+      }
+      setLoading(false);
+    };
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User authenticated:", user);
+        fetchUserPreferences(user);
+      } else {
+        console.log("No authenticated user found.");
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const postPerferences = () => {
+    const updateUserQuestainnare = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          jobLevel: jobLevels,
+          jobLevelWeight: jobLevelImportance,
+          locationPreference: locations,
+          locationWeight: locationImportance,
+          programPreference: program,
+          programWeight: programImportance,
+          salaryPreference: 100 - salary,
+          salaryWeight: salaryImportance,
+        });
+      }
+    };
+
+    updateUserQuestainnare();
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <ProtectedRoute>
       <div className="max-w-[1000px] absolute top-[50px] flex flex-col items-center justify-center pr-20">
@@ -42,41 +113,68 @@ const page = () => {
                 <div className="mb-5">
                   What is the minimum hourly salary you are looking for?
                 </div>
-                <SalarySlider />
+                <SalarySlider salary={salary} setSalary={setSalary} />
               </div>
-              <ImportanceScale className="w-1/2" />
+              <ImportanceScale
+                importance={salaryImportance}
+                setImportance={setSalaryImportance}
+                className="w-1/2"
+              />
             </div>
             <div className="flex justify-between mb-16">
               <div className="w-[500px] font-semibold text-black">
                 <div className="mb-5">
                   Do you want to apply to jobs with any program preferences?
                 </div>
-                <ProgramSelect />
+                <ProgramSelect program={program} setProgram={setProgram} />
               </div>
-              <ImportanceScale className="w-1/2" />
+              <ImportanceScale
+                importance={programImportance}
+                setImportance={setProgramImportance}
+                className="w-1/2"
+              />
             </div>
             <div className="flex mb-16 justify-between">
               <div className="w-[500px] font-semibold text-black">
                 <div className="mb-5">
                   What level of jobs are you looking for?
                 </div>
-                <JobLevelCheckboxes />
+                <JobLevelCheckboxes
+                  jobLevels={jobLevels}
+                  setJobLevels={setJobLevels}
+                />
               </div>
-              <ImportanceScale className="w-1/2" />
+              <ImportanceScale
+                importance={jobLevelImportance}
+                setImportance={setJobLevelImportance}
+                className="w-1/2"
+              />
             </div>
             <div className="flex justify-between">
               <div className="w-[500px] font-semibold text-black">
                 <div className="mb-5">
                   Do you have any location preferences?
                 </div>
-                <LocationCheckboxes />
+                <LocationCheckboxes
+                  locations={locations}
+                  setLocations={setLocations}
+                />
               </div>
-              <ImportanceScale className="w-1/2" />
+              <ImportanceScale
+                importance={locationImportance}
+                setImportance={setLocationImportance}
+                className="w-1/2"
+              />
             </div>
           </div>
         </div>
         <Link href="/joblist">
-          <button className="signin-button w-[500px] mb-20">Submit</button>
+          <button
+            className="signin-button w-[500px] mb-20"
+            onClick={postPerferences}
+          >
+            Submit
+          </button>
         </Link>
       </div>
     </ProtectedRoute>
@@ -85,10 +183,14 @@ const page = () => {
 
 export default page;
 
-const ImportanceScale = () => {
+const ImportanceScale = ({ importance, setImportance }) => {
   const marks = {
     1: "1",
     10: "10",
+  };
+
+  const handleChange = (value) => {
+    setImportance(value);
   };
 
   return (
@@ -97,20 +199,25 @@ const ImportanceScale = () => {
         How important is this for you?
       </div>
       <div className="w-full">
-        <Slider min={1} max={10} marks={marks} step={1} defaultValue={5} />
+        <Slider
+          min={1}
+          max={10}
+          marks={marks}
+          step={1}
+          defaultValue={importance}
+          onChange={handleChange}
+        />
       </div>
     </div>
   );
 };
 
-const SalarySlider = () => {
+const SalarySlider = ({ salary, setSalary }) => {
   // NOTE: This is a bit hacky - the slider is "reversed" so we need
   // to be careful with how we extract the value from it
-  const [value, setValue] = useState(80);
-  console.log(value);
 
   const onChange = (newValue) => {
-    setValue(newValue);
+    setSalary(newValue);
   };
 
   const marks = {
@@ -127,13 +234,13 @@ const SalarySlider = () => {
     100: "$0",
   };
 
-  const displayValue = 100 - value;
+  const displayValue = 100 - salary;
 
   return (
     <Slider
       reverse
       step={1}
-      value={value}
+      value={salary}
       onChange={onChange}
       marks={marks}
       min={0}
@@ -145,13 +252,14 @@ const SalarySlider = () => {
   );
 };
 
-const JobLevelCheckboxes = () => {
+const JobLevelCheckboxes = ({ jobLevels, setJobLevels }) => {
   const onChange = (checkedValues) => {
+    setJobLevels(checkedValues);
     console.log("checked = ", checkedValues);
   };
 
   return (
-    <Checkbox.Group onChange={onChange}>
+    <Checkbox.Group value={jobLevels} onChange={onChange}>
       <Row gutter={[16, 16]} justify="space-between">
         <Col>
           <Checkbox value="JUN">Junior</Checkbox>
@@ -167,13 +275,18 @@ const JobLevelCheckboxes = () => {
   );
 };
 
-const LocationCheckboxes = () => {
+const LocationCheckboxes = ({ locations, setLocations }) => {
   const onChange = (checkedValues) => {
+    setLocations(checkedValues);
     console.log("checked = ", checkedValues);
   };
 
   return (
-    <Checkbox.Group onChange={onChange} className="w-full flex">
+    <Checkbox.Group
+      value={locations}
+      onChange={onChange}
+      className="w-full flex"
+    >
       <div className="flex flex-col">
         <Checkbox value="ON">Ontario</Checkbox>
         <Checkbox value="QC">Quebec</Checkbox>
@@ -188,7 +301,7 @@ const LocationCheckboxes = () => {
   );
 };
 
-const ProgramSelect = () => {
+const ProgramSelect = ({ program, setProgram }) => {
   return (
     <Select
       showSearch
@@ -197,6 +310,10 @@ const ProgramSelect = () => {
       }}
       placeholder="Select a Program"
       optionFilterProp="label"
+      value={program || null}
+      onChange={(value) => {
+        setProgram(value);
+      }}
       filterSort={(optionA, optionB) =>
         (optionA?.label ?? "")
           .toLowerCase()
