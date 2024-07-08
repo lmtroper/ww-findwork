@@ -31,6 +31,8 @@ const Login = () => {
             jobLevelWeight: 5,
             locationPreference: [],
             locationWeight: 5,
+            likes: [],
+            dislikes: []
           });
           router.push("/questionnaire1");
         } else {
@@ -68,6 +70,8 @@ const Login = () => {
           jobLevelWeight: 5,
           locationPreference: [],
           locationWeight: 5,
+          likes: [],
+          dislikes: []
         });
         router.push("/questionnaire1");
       } else {
