@@ -25,7 +25,19 @@ const Login = () => {
             salaryPreference: 20,
             salaryWeight: 5,
             skills: [],
-            programPreference: "",
+            frontend_skills: [
+              "Product",
+              "Python",
+              "Agile",
+              "Java",
+              "Project Management",
+              "React",
+              "Development",
+              "C",
+              "C++",
+              "Kubernetes"
+            ],
+            programPreference: [],
             programWeight: 5,
             jobLevel: [],
             jobLevelWeight: 5,
@@ -33,7 +45,8 @@ const Login = () => {
             locationWeight: 5,
             likes: [],
             dislikes: [],
-            resume_content: ""
+            resume_content: "",
+            workterm_rating_weight: 5,
           });
           router.push("/questionnaire1");
         } else {
@@ -62,10 +75,22 @@ const Login = () => {
         await setDoc(userRef, {
           email: user.email,
           displayName: user.displayName,
-          salaryPreference: "",
+          salaryPreference: 20,
           salaryWeight: 5,
           skills: [],
-          programPreference: "",
+          frontend_skills: [
+            "Product",
+            "Python",
+            "Agile",
+            "Java",
+            "Project Management",
+            "React",
+            "Development",
+            "C",
+            "C++",
+            "Kubernetes"
+          ],
+          programPreference: [],
           programWeight: 5,
           jobLevel: [],
           jobLevelWeight: 5,
@@ -73,7 +98,8 @@ const Login = () => {
           locationWeight: 5,
           likes: [],
           dislikes: [],
-          resume_content: ""
+          resume_content: "",
+          workterm_rating_weight: 5,
         });
         router.push("/questionnaire1");
       } else {
