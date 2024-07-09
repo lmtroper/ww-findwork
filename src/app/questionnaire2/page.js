@@ -20,7 +20,6 @@ const resumeSkills = [
 ];
 
 const Page = () => {
-  const [username, setUsername] = useState("Sirisha");
   const [skills, setSkills] = useState(resumeSkills);
   const [selectedSkills, setSelectedSkills] = useState([]);
 
