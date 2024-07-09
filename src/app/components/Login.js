@@ -32,7 +32,8 @@ const Login = () => {
             locationPreference: [],
             locationWeight: 5,
             likes: [],
-            dislikes: []
+            dislikes: [],
+            resume_content: ""
           });
           router.push("/questionnaire1");
         } else {
@@ -71,7 +72,8 @@ const Login = () => {
           locationPreference: [],
           locationWeight: 5,
           likes: [],
-          dislikes: []
+          dislikes: [],
+          resume_content: ""
         });
         router.push("/questionnaire1");
       } else {
