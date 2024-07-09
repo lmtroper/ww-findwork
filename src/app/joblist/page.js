@@ -72,6 +72,10 @@ const Page = () => {
     }
   }, [jobData, preferences, resume]);
 
+  const handleButtonClick = () => {
+    window.open("https://waterlooworks.uwaterloo.ca/myAccount/dashboard.htm", "_blank");
+  };
+
   if (loading) {
     return (
       <div className="spinner-container">
@@ -97,16 +101,35 @@ const Page = () => {
           >
             Your Results!
           </div>
-          <div className="mb-10 max-w-[650px] font-light text-sm text-center">
-            Here are your results based on your questionnaire! Click on any of
-            them to open them in a new tab or shortlist them to check out later.
+          {jobData.length > 0 && (
+            <div className="mb-10 max-w-[650px] font-light text-sm text-center">
+              Here are your results based on your questionnaire! Click on any of
+              them to open them in a new tab or shortlist them to check out
+              later.
+            </div>
+          )}
+        </div>
+        {jobData.length > 0 ? (
+          <div className="w-[1000px] mb-20">
+            {jobs.map((job, index) => (
+              <Job key={index} job={job} />
+            ))}
           </div>
-        </div>
-        <div className="w-[1000px] mb-20">
-          {jobs.map((job, index) => (
-            <Job key={index} job={job} />
-          ))}
-        </div>
+        ) : (
+          <>
+            <div className="mb-5 max-w-[650px] text-sm">
+              It looks like you haven't scraped any data on WaterlooWorks yet.
+              Please head over to WaterlooWorks and scrape some data to see some
+              great results here!
+            </div>
+            <button
+              onClick={handleButtonClick}
+              className="signin-button w-[250px] h-[55px] flex items-center justify-center bg-white border border-gray-300 rounded-lg"
+            >
+              <span className="font-small">Go to WaterlooWorks</span>
+            </button>
+          </>
+        )}
       </div>
     </ProtectedRoute>
   );
