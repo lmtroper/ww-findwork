@@ -1,30 +1,173 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Circle from "@/app/components/Circle";
-import ScrapeButton from "@/app/components/ScrapeButton";
 import ProtectedRoute from "../components/ProtectedRoute";
+import { auth, db } from "../../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { Bakbak_One } from "next/font/google";
+import { uploadFile, readFile } from "../helpers/FileUpload";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import * as pdfjsLib from "pdfjs-dist/webpack";
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const Page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [resume, setResume] = useState(null);
   const [resumeURL, setResumeURL] = useState(null);
+  const [fileContent, setFileContent] = useState("");
+  const [fileURL, setFileURL] = useState("");
+  const [error, setError] = useState("");
 
-  const handleResumeUpload = (event) => {
+  const stopwords = [
+    "a",
+    "about",
+    "and",
+    "achievements",
+    "abilities",
+    "across",
+    "always",
+    "and",
+    "an",
+    "as",
+    "at",
+    "be",
+    "been",
+    "being",
+    "by",
+    "clients",
+    "conduct",
+    "develop",
+    "developing",
+    "duties",
+    "driven",
+    "experience",
+    "for",
+    "from",
+    "goals",
+    "growth",
+    "have",
+    "highly",
+    "in",
+    "is",
+    "it",
+    "knowledge",
+    "management",
+    "meet",
+    "most",
+    "need",
+    "objectives",
+    "on",
+    "our",
+    "out",
+    "over",
+    "of",
+    "partners",
+    "perform",
+    "professional",
+    "projects",
+    "proven",
+    "real-time",
+    "recognize",
+    "research",
+    "results",
+    "role",
+    "skills",
+    "sourcing",
+    "speaking",
+    "specific",
+    "supporting",
+    "team",
+    "the",
+    "to",
+    "understanding",
+    "up",
+    "we",
+    "while",
+    "with",
+    "work",
+  ];
+
+  const extractTextFromPDF = async (file) => {
+    const pdf = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
+    let text = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const strings = content.items.map((item) => item.str);
+      const pageText = strings.join(" ");
+
+      // Split text into words, filter out stopwords, and rejoin
+      const filteredText = pageText
+        .split(/\s+/)
+        .filter((word) => !stopwords.includes(word.toLowerCase()))
+        .join(" ");
+
+      text += filteredText;
+    }
+
+    return text.replace(/[\#\•\§\ï\/\-\:\=\+\;\'\"\?\!\.]/g, "").trim();
+  };
+
+  const handleResumeUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setResume(file);
-      const url = URL.createObjectURL(file);
-      setResumeURL(url);
+    try {
+      if (file) {
+        setResume(file);
+        const url = URL.createObjectURL(file);
+        setResumeURL(url);
+
+        // We are not using the file in firestore at all, just keeping since I set it up and we can collect resumes.
+        const urlFireStore = await uploadFile(file);
+        setFileURL(urlFireStore);
+        setError("");
+      } else {
+        setError("Please select a file to upload.");
+      }
+    } catch (err) {
+      setError("Error uploading file.");
     }
   };
 
-  const handeNext = () => {
-    // handle the next button click here
-    // TO-DO: parse through resume, extract skills section
+  useEffect(() => {
+    const getUserName = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User authenticated:", user);
+        setUsername(user.displayName);
+      } else {
+        console.log("No authenticated user found.");
+      }
+    });
+
+    return () => getUserName();
+  }, []);
+
+  const saveResumeToDb = async () => {
+    const updateUserResumeContent = async (resumeContent) => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          resume_content: resumeContent,
+        });
+      }
+    };
+
+    try {
+      if (resume) {
+        // reading the file from firestore but also not use, but creates a small delay, so the button doesn't show any errors!
+        await readFile(fileURL);
+        const resumeContent = await extractTextFromPDF(resume);
+        updateUserResumeContent(resumeContent);
+        setError("");
+      } else {
+        setError("No file URL available. Please upload a file first.");
+      }
+    } catch (err) {
+      setError("Error reading file.");
+    }
   };
 
   return (
@@ -74,9 +217,9 @@ const Page = () => {
           style={{ display: "none" }}
           onChange={handleResumeUpload}
         />
-        <ScrapeButton/>
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <Link href="questionnaire2">
-          <button className="signin-button w-[640px]">
+          <button className="signin-button w-[640px]" onClick={saveResumeToDb}>
             Start questionnaire
           </button>
         </Link>
