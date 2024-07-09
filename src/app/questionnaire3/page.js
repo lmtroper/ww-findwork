@@ -20,6 +20,7 @@ const Page = () => {
   const [jobLevelImportance, setJobLevelImportance] = useState(5);
   const [locations, setLocations] = useState([]);
   const [locationImportance, setLocationImportance] = useState(5);
+  const [worktermRatingImportance, setWorktermRatingImportance] = useState(5);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ const Page = () => {
           setProgramImportance(data.programWeight);
           setSalary(100 - data.salaryPreference); // Invert the salary slider value
           setSalaryImportance(data.salaryWeight);
+          setWorktermRatingImportance(data.workterm_rating_weight);
         }
       }
       setLoading(false);
@@ -69,6 +71,7 @@ const Page = () => {
           programWeight: programImportance,
           salaryPreference: 100 - salary,
           salaryWeight: salaryImportance,
+          workterm_rating_weight: worktermRatingImportance,
         });
       }
     };
@@ -115,6 +118,7 @@ const Page = () => {
                 <SalarySlider salary={salary} setSalary={setSalary} />
               </div>
               <ImportanceScale
+                text={"How important is this for you?"}
                 importance={salaryImportance}
                 setImportance={setSalaryImportance}
                 className="w-1/2"
@@ -123,11 +127,12 @@ const Page = () => {
             <div className="flex justify-between mb-16">
               <div className="w-[500px] font-semibold text-black">
                 <div className="mb-5">
-                  Do you want to apply to jobs with any program preferences?
+                  Do you want to apply to jobs with any thematic cluster preferences?
                 </div>
                 <ProgramSelect program={program} setProgram={setProgram} />
               </div>
               <ImportanceScale
+                text={"How important is this for you?"}
                 importance={programImportance}
                 setImportance={setProgramImportance}
                 className="w-1/2"
@@ -144,12 +149,13 @@ const Page = () => {
                 />
               </div>
               <ImportanceScale
+                text={"How important is this for you?"}
                 importance={jobLevelImportance}
                 setImportance={setJobLevelImportance}
                 className="w-1/2"
               />
             </div>
-            <div className="flex justify-between">
+            <div className="flex mb-16 justify-between">
               <div className="w-[500px] font-semibold text-black">
                 <div className="mb-5">
                   Do you have any location preferences?
@@ -160,10 +166,23 @@ const Page = () => {
                 />
               </div>
               <ImportanceScale
+                text={"How important is this for you?"}
                 importance={locationImportance}
                 setImportance={setLocationImportance}
                 className="w-1/2"
               />
+            </div>
+            <div className="flex justify-center ">
+              <div className="w-[500px] font-semibold text-black">
+                <ImportanceScale
+                  text={
+                    "How important is the work-term ratings of a company to you?"
+                  }
+                  importance={worktermRatingImportance}
+                  setImportance={setWorktermRatingImportance}
+                  className="w-1/2"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -182,7 +201,7 @@ const Page = () => {
 
 export default Page;
 
-const ImportanceScale = ({ importance, setImportance }) => {
+const ImportanceScale = ({ text, importance, setImportance }) => {
   const marks = {
     1: "1",
     10: "10",
@@ -194,9 +213,7 @@ const ImportanceScale = ({ importance, setImportance }) => {
 
   return (
     <div className="w-[500px]">
-      <div className="font-semibold text-black">
-        How important is this for you?
-      </div>
+      <div className="font-semibold text-black">{text}</div>
       <div className="w-full">
         <Slider
           min={1}
@@ -289,7 +306,9 @@ const LocationCheckboxes = ({ locations, setLocations }) => {
       <div className="flex flex-col">
         <Checkbox value="Ontario">Ontario</Checkbox>
         <Checkbox value="Quebec">Quebec</Checkbox>
-        <Checkbox value="United States of America">United States of America</Checkbox>
+        <Checkbox value="United States of America">
+          United States of America
+        </Checkbox>
       </div>
       <div className="flex flex-col">
         <Checkbox value="International">International</Checkbox>
@@ -301,13 +320,46 @@ const LocationCheckboxes = ({ locations, setLocations }) => {
 };
 
 const ProgramSelect = ({ program, setProgram }) => {
+  const programOptions = [
+    "ACCOUNTING AND AUDITING",
+    "AGRICULTURAL AND FOOD SCIENCES",
+    "ARCHITECTURE AND DESIGN",
+    "BUSINESS ADMINISTRATION",
+    "COMPUTING: HARDWARE DEVELOPMENT",
+    "COMPUTING: INFORMATION SYSTEMS AND DATA MANAGEMENT",
+    "COMPUTING: SOFTWARE DEVELOPMENT",
+    "COMPUTING: SYSTEMS SUPPORT",
+    "CONSTRUCTION AND INFRASTRUCTURE DEVELOPMENT",
+    "CYBERSECURITY AND CRYPTOGRAPHY",
+    "DATA SCIENCE, ANALYTICS, REPORTING AND OPTIMIZATION",
+    "DIGITAL AND GRAPHIC MEDIA AND WEB SITE DESIGN",
+    "ENVIRONMENTAL MANAGEMENT, CLIMATE CHANGE AND SUSTAINABILITY",
+    "FINANCE AND INVESTMENT",
+    "HEALTH CARE: THERAPY AND PATIENT CARE",
+    "HEALTH PROMOTION AND WORKPLACE SAFETY",
+    "HUMAN RESOURCES",
+    "INSURANCE AND RISK MANAGEMENT",
+    "MANUFACTURING AND PROCESS ENGINEERING",
+    "MARKETING AND COMMUNICATION",
+    "PHARMACY AND PHARMACEUTICALS",
+    "PROJECT AND PROCESS MANAGEMENT",
+    "PUBLIC POLICY, PUBLIC SERVICE, AND GOVERNMENT RELATIONS",
+    "RECREATION, EVENT PLANNING AND HOSPITALITY",
+    "SALES AND BUSINESS DEVELOPMENT",
+    "SCIENTIFIC EXPERIMENTAL DESIGN AND LABORATORY ASSISTANCE",
+    "SPORT AND FITNESS",
+    "SUPPLY CHAIN MANAGEMENT AND LOGISTICS",
+    "TRANSPORTATION PLANNING AND TRANSPORTATION ENGINEERING",
+    "WASTE, WATER AND MATERIALS MANAGEMENT",
+  ];
   return (
     <Select
+      mode="multiple"
       showSearch
       style={{
-        width: 200,
+        width: 350,
       }}
-      placeholder="Select a Program"
+      placeholder="Select thematic clusters"
       optionFilterProp="label"
       value={program || null}
       onChange={(value) => {
@@ -318,32 +370,10 @@ const ProgramSelect = ({ program, setProgram }) => {
           .toLowerCase()
           .localeCompare((optionB?.label ?? "").toLowerCase())
       }
-      options={[
-        {
-          value: "1",
-          label: "Not Identified",
-        },
-        {
-          value: "2",
-          label: "Closed",
-        },
-        {
-          value: "3",
-          label: "Communicated",
-        },
-        {
-          value: "4",
-          label: "Identified",
-        },
-        {
-          value: "5",
-          label: "Resolved",
-        },
-        {
-          value: "6",
-          label: "Cancelled",
-        },
-      ]}
+      options={programOptions.map((option) => ({
+        value: option,
+        label: option,
+      }))}
     />
   );
 };
