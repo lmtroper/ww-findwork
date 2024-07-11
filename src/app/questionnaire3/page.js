@@ -176,7 +176,7 @@ const Page = () => {
               <div className="w-[500px] font-semibold text-black">
                 <ImportanceScale
                   text={
-                    "How important is the work-term ratings of a company to you?"
+                    "How important are the work-term ratings of a company to you?"
                   }
                   importance={worktermRatingImportance}
                   setImportance={setWorktermRatingImportance}
@@ -321,37 +321,38 @@ const LocationCheckboxes = ({ locations, setLocations }) => {
 
 const ProgramSelect = ({ program, setProgram }) => {
   const programOptions = [
-    "ACCOUNTING AND AUDITING",
-    "AGRICULTURAL AND FOOD SCIENCES",
-    "ARCHITECTURE AND DESIGN",
-    "BUSINESS ADMINISTRATION",
-    "COMPUTING: HARDWARE DEVELOPMENT",
-    "COMPUTING: INFORMATION SYSTEMS AND DATA MANAGEMENT",
-    "COMPUTING: SOFTWARE DEVELOPMENT",
-    "COMPUTING: SYSTEMS SUPPORT",
-    "CONSTRUCTION AND INFRASTRUCTURE DEVELOPMENT",
-    "CYBERSECURITY AND CRYPTOGRAPHY",
-    "DATA SCIENCE, ANALYTICS, REPORTING AND OPTIMIZATION",
-    "DIGITAL AND GRAPHIC MEDIA AND WEB SITE DESIGN",
-    "ENVIRONMENTAL MANAGEMENT, CLIMATE CHANGE AND SUSTAINABILITY",
-    "FINANCE AND INVESTMENT",
-    "HEALTH CARE: THERAPY AND PATIENT CARE",
-    "HEALTH PROMOTION AND WORKPLACE SAFETY",
-    "HUMAN RESOURCES",
-    "INSURANCE AND RISK MANAGEMENT",
-    "MANUFACTURING AND PROCESS ENGINEERING",
-    "MARKETING AND COMMUNICATION",
-    "PHARMACY AND PHARMACEUTICALS",
-    "PROJECT AND PROCESS MANAGEMENT",
-    "PUBLIC POLICY, PUBLIC SERVICE, AND GOVERNMENT RELATIONS",
-    "RECREATION, EVENT PLANNING AND HOSPITALITY",
-    "SALES AND BUSINESS DEVELOPMENT",
-    "SCIENTIFIC EXPERIMENTAL DESIGN AND LABORATORY ASSISTANCE",
-    "SPORT AND FITNESS",
-    "SUPPLY CHAIN MANAGEMENT AND LOGISTICS",
-    "TRANSPORTATION PLANNING AND TRANSPORTATION ENGINEERING",
-    "WASTE, WATER AND MATERIALS MANAGEMENT",
+    "accounting and auditing",
+    "agricultural and food sciences",
+    "architecture and design",
+    "business administration",
+    "computing: hardware development",
+    "computing: information systems and data management",
+    "computing: software development",
+    "computing: systems support",
+    "construction and infrastructure development",
+    "cybersecurity and cryptography",
+    "data science, analytics, reporting and optimization",
+    "digital and graphic media and web site design",
+    "environmental management, climate change and sustainability",
+    "finance and investment",
+    "health care: therapy and patient care",
+    "health promotion and workplace safety",
+    "human resources",
+    "insurance and risk management",
+    "manufacturing and process engineering",
+    "marketing and communication",
+    "pharmacy and pharmaceuticals",
+    "project and process management",
+    "public policy, public service, and government relations",
+    "recreation, event planning and hospitality",
+    "sales and business development",
+    "scientific experimental design and laboratory assistance",
+    "sport and fitness",
+    "supply chain management and logistics",
+    "transportation planning and transportation engineering",
+    "waste, water and materials management"
   ];
+  
   return (
     <Select
       mode="multiple"

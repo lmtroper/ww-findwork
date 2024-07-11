@@ -8,6 +8,7 @@ import { Bakbak_One } from "next/font/google";
 import {
   retrieveUserPreferences,
   retrieveUserResume,
+  retrieveUserSkills
 } from "../helpers/retrieve_data";
 import { getCachedData, parsePostings } from "../helpers/parse_data";
 import { assignUtility } from "../helpers/utility_score";
@@ -27,11 +28,12 @@ const Page = () => {
   const [jobs, setJobs] = useState([]);
   const [jobData, setJobData] = useState(null);
   const [preferences, setPreferences] = useState(null);
-  const [resume, setResume] = useState("python, javascript, programming");
+  const [resume, setResume] = useState(null);
+  const [skills, setSkills] = useState([])
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCachedData("koblgeegnganccfocgebfddpadolchbi")
+    getCachedData("ijmmbpioejdfnlbghgeonddkajmjccpm")
       .then((data) => {
         const jobResults = parsePostings(data);
         setJobData(jobResults);
@@ -51,26 +53,44 @@ const Page = () => {
       console.log(userPreferences);
     };
 
-    const getPreferences = onAuthStateChanged(auth, (user) => {
+    const fetchResume = async () => {
+      const user = auth.currentUser;
+      const userResume = await retrieveUserResume(user.uid);
+      setResume(userResume);
+    };
+
+    const fetchSkills = async () => {
+      const user = auth.currentUser;
+      const userSkills = await retrieveUserSkills(user.uid);
+      setSkills(userSkills);
+      console.log(`Skills: ${userSkills}`)
+    };
+
+    const getData = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User authenticated:", user);
         fetchPreferences(user);
+        fetchResume(user)
+        fetchSkills(user)
       } else {
         console.log("No authenticated user found.");
       }
     });
 
-    return () => getPreferences();
+    return () => getData();
   }, []);
 
   useEffect(() => {
-    // Check if all data is loaded
-    if (jobData !== null && preferences !== null && resume !== "") {
-      setLoading(false);
-      var jobDataUtility = assignUtility(jobData, preferences, resume);
-      setJobs(jobDataUtility);
+    // Check if all data is loaded and none are undefined
+    if (jobData !== undefined && jobData !== null &&
+        preferences !== undefined && preferences !== null &&
+        resume !== undefined && resume !== null && skills !== undefined && skills !== null) {
+        console.log("Data loaded")
+        setLoading(false);
+        var jobDataUtility = assignUtility(jobData, preferences, skills, resume);
+        setJobs(jobDataUtility);
     }
-  }, [jobData, preferences, resume]);
+}, [jobData, preferences, skills, resume]);
 
   const handleButtonClick = () => {
     window.open("https://waterlooworks.uwaterloo.ca/myAccount/dashboard.htm", "_blank");
@@ -237,10 +257,16 @@ const Job = ({ job }) => {
           </Link>
         </div>
         <div className="flex">
-          <div className="text-[14px] text-black">
-            {job.company + " - " + job.mappedRegion}
-          </div>
+        <div className="flex">
+        <div className="text-[14px] text-black">
+          {job.company} - {job.mappedRegion} &nbsp;&nbsp;|&nbsp;&nbsp;<b>Match Score: </b>
+          <span style={{ color: job.scaledUtilityScore > 0.7 ? 'green' : (job.scaledUtilityScore >= 0.33 ? '#D5B60A' : '#FFCC00') }}>
+          <b>{job.scaledUtilityScore}</b>
+          </span>
+          &nbsp;
         </div>
+      </div>
+      </div>
       </div>
       <div className="flex">
         <button

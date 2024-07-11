@@ -22,6 +22,8 @@ export async function retrieveUserPreferences(uid) {
                 programWeight: userData.programWeight || 0,
                 salaryPreference: userData.salaryPreference || 0,
                 salaryWeight: userData.salaryWeight || 0,
+                workTermRatingWeight: userData.workterm_rating_weight || 8,
+                programPreference: userData.programPreference || [],
                 skills: userData.skills || '',
             };
 
@@ -36,18 +38,28 @@ export async function retrieveUserPreferences(uid) {
     }
 }
 
-export async function retrieveUserResume(email) {
-    const collectionRef = collection(db, "users");
-    const snapshot = await collectionRef.where("email", "==", email).get();
-    if (snapshot.empty) {
-        console.log('No matching documents.');
-        return;
+export async function retrieveUserResume(uid) {
+    const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    if(userDoc.exists()) {
+        const userData = userDoc.data()
+        const userResume = userData.resume_content
+        return userResume
     }
-    let userResume = "";
-    snapshot.forEach((doc) => {
-        const data = doc.data;
-        userResume = data.resume
-    })
+    else {
+        return null
+    }
+}
 
-    return userResume
+export async function retrieveUserSkills(uid) {
+    const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    if(userDoc.exists()) {
+        const userData = userDoc.data()
+        const userSkills = userData.frontend_skills
+        return userSkills
+    }
+    else {
+        return null
+    }
 }

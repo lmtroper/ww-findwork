@@ -48,12 +48,16 @@ export function extractText(input) {
 
 export function parsePostings(data) {
     var jobList = []
+    console.log(data)
     Object.keys(data).forEach(key => {
         if (key.toLowerCase().includes('job') && key !== "VIEWED_JOBS") {
             var jobDetails = {}
             var jobId = data[key]["jobId"];
             var jobPostingInfo = data[key].pageData?.["Job Posting Information"];
             var postingListData = data[key]["postingListData"];
+
+            var divisionId = data[key]["divisionId"]
+            var averageWorkTermRating = getAverageWorkTermRating(divisionId, data)
             
             if (jobPostingInfo) { 
 
@@ -82,6 +86,7 @@ export function parsePostings(data) {
                 
                 jobDetails.jobId = jobId
                 jobDetails.company = company
+                jobDetails.averageWorkTermRating = averageWorkTermRating
                 jobDetails.jobTitle = jobTitle
                 jobDetails.jobDescription = jobDescription
                 jobDetails.compensation = formattedCompensation
@@ -131,7 +136,7 @@ function extractThemesFromPrograms(htmlContent) {
     let match;
 
     while ((match = regex.exec(htmlContent)) !== null) {
-        themes.push(match[1].trim());
+        themes.push(match[1].trim().toLowerCase());
     }
 
     return themes;
@@ -160,4 +165,35 @@ function mapRegion(region) {
         return undefined
     }
 
+}
+
+function getAverageWorkTermRating(divisionId, wworksData) {
+    if(divisionId == undefined) {
+        return 4 / 5
+    }
+    for(let key in wworksData) {
+        if(key.includes(divisionId)) {
+            const divisionData = wworksData[key]["graphs"]
+            if(divisionData.length == 5) {
+                const ratingsData = divisionData[4].series
+                let totalSum = 0;
+                let totalLength = 0;
+                
+                ratingsData.forEach(series => {
+                    const seriesData = series.data;
+                    const sum = seriesData.reduce((acc, value) => acc + value, 0);
+                    totalSum += sum;
+                    totalLength += seriesData.length; // Correctly increment the total length
+                });
+                
+                // Now you can calculate the average
+                const averageRating = totalSum / totalLength;
+                return averageRating / 5
+            }
+            // If data not available, assume average rating
+            else {
+                return 4 / 5
+            }
+        }
+    }
 }
