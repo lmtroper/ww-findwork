@@ -1,8 +1,8 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebase";
 
-export const uploadFile = async (file) => {
-  const storageRef = ref(storage, `resumes/${file.name}`);
+export const uploadFile = async (file, uid) => {
+  const storageRef = ref(storage, `resumes/${uid}/${file.name}`);
   await uploadBytes(storageRef, file);
   const downloadURL = await getDownloadURL(storageRef);
   return downloadURL;

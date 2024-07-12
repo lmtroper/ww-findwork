@@ -4,21 +4,24 @@ import Link from "next/link";
 import Image from "next/image";
 import Circle from "@/app/components/Circle";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { auth, db } from "../../../firebase";
+import { auth, db, storage } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { Bakbak_One } from "next/font/google";
 import { uploadFile, readFile } from "../helpers/FileUpload";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, getDownloadURL, listAll } from "firebase/storage";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 const bakbakOne = Bakbak_One({ subsets: ["latin"], weight: "400" });
 
 const Page = () => {
   const [username, setUsername] = useState("Sirisha");
   const [resume, setResume] = useState(null);
+  const [resumeName, setResumeName] = useState("");
   const [resumeURL, setResumeURL] = useState(null);
   const [fileContent, setFileContent] = useState("");
   const [fileURL, setFileURL] = useState("");
   const [error, setError] = useState("");
+  const [resume_Content, setResumeContent] = useState("");
 
   const stopwords = [
     "a",
@@ -113,14 +116,16 @@ const Page = () => {
 
   const handleResumeUpload = async (event) => {
     const file = event.target.files[0];
+    const user = auth.currentUser;
     try {
       if (file) {
         setResume(file);
+        setResumeName(file.name);
         const url = URL.createObjectURL(file);
         setResumeURL(url);
 
         // We are not using the file in firestore at all, just keeping since I set it up and we can collect resumes.
-        const urlFireStore = await uploadFile(file);
+        const urlFireStore = await uploadFile(file, user.uid);
         setFileURL(urlFireStore);
         setError("");
       } else {
@@ -132,10 +137,35 @@ const Page = () => {
   };
 
   useEffect(() => {
+    const fetchResumeContent = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setResumeContent(data.resume_content);
+          setResumeName(data.resume_name);
+
+          if (data.resume_name) {
+            // Fetch the resume URL from Firestore Storage
+            const storageRef = ref(
+              storage,
+              `resumes/${user.uid}/${data.resume_name}`
+            );
+
+            setResume(data.resume_name);
+            const downloadURL = await getDownloadURL(storageRef);
+            setResumeURL(downloadURL);
+          }
+        }
+      }
+    };
     const getUserName = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User authenticated:", user);
         setUsername(user.displayName);
+        fetchResumeContent();
       } else {
         console.log("No authenticated user found.");
       }
@@ -144,6 +174,8 @@ const Page = () => {
     return () => getUserName();
   }, []);
 
+  useEffect(() => {}, []);
+
   const saveResumeToDb = async () => {
     const updateUserResumeContent = async (resumeContent) => {
       const user = auth.currentUser;
@@ -151,6 +183,7 @@ const Page = () => {
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, {
           resume_content: resumeContent,
+          resume_name: resumeName,
         });
       }
     };
@@ -160,6 +193,7 @@ const Page = () => {
         // reading the file from firestore but also not use, but creates a small delay, so the button doesn't show any errors!
         await readFile(fileURL);
         const resumeContent = await extractTextFromPDF(resume);
+        setResumeContent(resumeContent);
         updateUserResumeContent(resumeContent);
         setError("");
       } else {
@@ -199,7 +233,7 @@ const Page = () => {
               rel="noopener noreferrer"
               className="text-blue-500 underline"
             >
-              {resume.name}
+              {typeof resume === "string" ? resume : resume?.name}
             </a>
           </div>
         )}
@@ -217,8 +251,8 @@ const Page = () => {
           style={{ display: "none" }}
           onChange={handleResumeUpload}
         />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <Link href="questionnaire2">
+        {error && !resume_Content && <p style={{ color: "red" }}>{error}</p>}
+        <Link href={resume || resume_Content ? "questionnaire2" : "#"}>
           <button className="signin-button w-[640px]" onClick={saveResumeToDb}>
             Start questionnaire
           </button>

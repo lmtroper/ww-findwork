@@ -46,6 +46,7 @@ const Login = () => {
             likes: [],
             dislikes: [],
             resume_content: "",
+            resume_name: "",
             workterm_rating_weight: 5,
           });
           router.push("/questionnaire1");
@@ -99,6 +100,7 @@ const Login = () => {
           likes: [],
           dislikes: [],
           resume_content: "",
+          resume_name: "",
           workterm_rating_weight: 5,
         });
         router.push("/questionnaire1");
