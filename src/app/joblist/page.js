@@ -260,7 +260,7 @@ const Job = ({ job }) => {
         <div className="flex">
         <div className="text-[14px] text-black">
           {job.company} - {job.mappedRegion} &nbsp;&nbsp;|&nbsp;&nbsp;<b>Match Score: </b>
-          <span style={{ color: job.scaledUtilityScore > 0.7 ? 'green' : (job.scaledUtilityScore >= 0.33 ? '#D5B60A' : '#FFCC00') }}>
+          <span style={{ color: job.scaledUtilityScore > 0.5 ? 'green' : (job.scaledUtilityScore >= 0.33 ? '#D5B60A' : '#FFCC00') }}>
           <b>{job.scaledUtilityScore}</b>
           </span>
           &nbsp;

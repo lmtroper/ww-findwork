@@ -56,7 +56,7 @@ export async function retrieveUserSkills(uid) {
     const userDoc = await getDoc(userRef);
     if(userDoc.exists()) {
         const userData = userDoc.data()
-        const userSkills = userData.frontend_skills
+        const userSkills = userData.skills
         return userSkills
     }
     else {
