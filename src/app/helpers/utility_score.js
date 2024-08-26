@@ -36,10 +36,9 @@ export function assignUtility(jobData, userPreferences, skills, resume) {
         // Calculate utility score using scaled cosine similarity and other scores
         const utilityScore = locationScore + workTermRatingScore + salaryScore + programScore + scaledCosineSimilarity + skScore;
         const scaledUtilityScore = (utilityScore / (10)).toFixed(2)
-        const url = `https://waterlooworks.uwaterloo.ca/myAccount/graduating/jobs.htm?ck_jobid=${job.jobId}`;
         console.log(`Job ID: ${job.jobId}, Utility Score: ${utilityScore.toFixed(2)}, Cosine Similarity: ${scaledCosineSimilarity}, Location Score: ${locationScore}, Salary Score: ${salaryScore.toFixed(2)}, Program Score: ${programScore}, Skill Score: ${skScore}, WTR Score: ${workTermRatingScore}`);
 
-        return { ...job, utilityScore, scaledUtilityScore, url };
+        return { ...job, utilityScore, scaledUtilityScore };
     });
 
     // Step 4: Sort jobDataUtility by utilityScore descending
