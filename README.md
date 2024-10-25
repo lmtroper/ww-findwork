@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# FindWork - Intelligent Decision Support System (IDSS)
 
-## Getting Started
+FindWork is an Intelligent Decision Support System (IDSS) designed to simplify the job search process on WaterlooWorks by helping students quickly identify the most relevant job postings. It aims to reduce the time spent on reviewing and shortlisting jobs by presenting users with opportunities that match their preferences.
 
-First, run the development server:
+## Table of Contents
+- [Video Demo](#video-demo)
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Model Description](#model-description)
+- [Data Processing](#data-processing)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Video Demo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Overview
+With 1500+ job postings in each typical WaterlooWorks cycle, finding relevant jobs can be overwhelming. FindWork helps users:
+- Filter jobs based on factors like role type, salary, location, level, skills, and work term ratings.
+- Save time by ranking job postings according to personal preferences using a utility-based model.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Features
+- Real-time job posting data collected using a WaterlooWorks scraper.
+- Customizable job ranking based on user preferences and resume similarity.
+- Frontend interface with Next.js for a responsive user experience.
+- Backend in JavaScript with Firestore for secure data storage and retrieval.
 
-## Learn More
+## Tech Stack
+- **Frontend**: Next.js
+- **Backend**: JavaScript
+- **Database**: Firestore (Firebase)
 
-To learn more about Next.js, take a look at the following resources:
+## Installation
+To run FindWork locally:
+1. Clone this repository.
+   ```
+   git clone https://github.com/yourusername/FindWork.git
+    ```
+2. Navigate to the project directory.
+   ```
+   cd FindWork
+   ```
+3. Install the required dependencies.
+  ```
+   npm install
+   ```
+4. Run the app locally.
+    ```
+   npm run dev
+   ```
+5. Access the application at http://localhost:3000.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
+1. **Sign Up**: Register and sign in using Firebase authentication.
+2. **Set Preferences**: Customize your job search by setting job preferences, skills, and uploading a resume.
+3. **Find Jobs**: The IDSS model ranks and displays relevant job postings based on your criteria.
+4. **Shortlist & Save**: Save jobs that align with your preferences for easy application access.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Model Description
+The ranking model uses a linear combination of factors to score each job posting, considering:
+- **Location**: Whether the job location matches the user’s preference.
+- **Job Level**: Entry, junior, or senior level.
+- **Skills Match**: Ratio of required job skills that match the user’s skillset.
+- **Compensation**: Standardized and scaled hourly salary.
+- **Rating**: Company ratings based on previous work terms.
+- **Similarity**: Cosine similarity between job description and user’s resume.
 
-## Deploy on Vercel
+## Data Processing
+1. **Parsing**: Job data is scraped and parsed to clean and standardize fields.
+2. **Scoring**: Missing data is handled with default scores, allowing flexibility in ranking.
+3. **Real-Time Updates**: Data is live and automatically refreshed to provide the most up-to-date job postings.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
