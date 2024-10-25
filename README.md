@@ -14,6 +14,7 @@ FindWork is an Intelligent Decision Support System (IDSS) designed to simplify t
 
 ## Video Demo
 
+[![Video Demo](https://youtu.be/YSyxAIyex5s/0.jpg)](https://youtu.be/YSyxAIyex5s)
 
 ## Overview
 With 1500+ job postings in each typical WaterlooWorks cycle, finding relevant jobs can be overwhelming. FindWork helps users:
